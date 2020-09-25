@@ -8,7 +8,7 @@ Completed:
 
 Incompleted:
 
-* Background for the Realm.
+* Background for the Cliffside Realm.
 * Lighting for the Track.
 * The physics for good gameplay.
 * 31 cars
