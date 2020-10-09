@@ -1,0 +1,64 @@
+# Blender MTL File: 'None'
+# Material Count: 5
+
+newmtl Body2_Mat.001
+Ns 115.686275
+Ka 1.000000 1.000000 1.000000
+Kd 0.027198 0.029091 0.022897
+Ks 0.496881 0.496881 0.496881
+Ke 0.004351 0.004654 0.003663
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Textures\Mat.png
+map_d Textures\\Reflection Test.png
+refl Textures\\Reflection Test.png
+
+newmtl Body2_Mat2.001
+Ns 92.156863
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.785429 0.785429 0.785429
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\Roney Leao Nero 149\Downloads\Projetos\Nova pasta\textures\BodyDown3.png
+map_d Textures\\Reflection Test.png
+refl Textures\\Reflection Test.png
+
+newmtl Body_Mat1.001
+Ns 92.156863
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Textures\Vynyl-carbide3.png
+map_Bump Textures\\Vynyl-carbide3.png
+
+newmtl Carbide_Mat_Glass.001
+Ns 343.137255
+Ka 1.000000 1.000000 1.000000
+Kd 0.777143 0.777143 0.777143
+Ks 0.138095 0.138095 0.138095
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Textures\Carbide Window2.png
+refl Textures\\Reflection Test.png
+
+newmtl Material.002
+Ns 254.901961
+Ka 1.000000 1.000000 1.000000
+Kd 0.792000 0.792000 0.792000
+Ks 0.024000 0.024000 0.024000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Textures\Mat.png
+map_Bump Textures\\Mat.png
