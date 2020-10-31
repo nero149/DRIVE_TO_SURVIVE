@@ -1,0 +1,49 @@
+# Blender MTL File: 'Silencer Wheel.blend'
+# Material Count: 4
+
+newmtl Color
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.000623 0.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.848000 0.000826 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\Roney Leao Nero 149\Downloads\Projetos\Acceleracers\Wheels\Silencer Rim.png
+
+newmtl Rim
+Ns 205.882353
+Ka 1.000000 1.000000 1.000000
+Kd 0.425649 0.438539 0.412984
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\Roney Leao Nero 149\Downloads\Projetos\Acceleracers\Nova pasta\textures\Rim.png
+
+newmtl Rim_Silencer_Rim.png
+Ns 205.882353
+Ka 1.000000 1.000000 1.000000
+Kd 0.425649 0.438539 0.412984
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\Roney Leao Nero 149\Downloads\Projetos\Acceleracers\Wheels\Silencer Rim.png
+
+newmtl Wheel
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\Roney Leao Nero 149\Downloads\Projetos\Acceleracers\Nova pasta\textures\Tyre UV.png
+map_Ke C:\\Users\\Roney Leao Nero 149\\Downloads\\Projetos\\Acceleracers\\Wheels\\Silencer UV.png
+map_Ks C:\\Users\\Roney Leao Nero 149\\Downloads\\Projetos\\Acceleracers\\Wheels\\Silencer UV.png
+map_Ns C:\\Users\\Roney Leao Nero 149\\Downloads\\Projetos\\Acceleracers\\Wheels\\Silencer UV.png
