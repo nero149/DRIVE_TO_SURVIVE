@@ -199,7 +199,7 @@ public class NewCarControl2 : MonoBehaviour
 	public float HandbrakPower = 0; //Car Gear Max
 	public float radius = 6;
 	public float lastValue;
-	private float DownForceValue = 10f;
+	private float DownForceValue = 8.5f;
 	//For Future Systems of Speed,Gear, Drifting,Damage
 	public float CarLife = 1000; //Speed
 	public float Nitrox = 3; //Speed
