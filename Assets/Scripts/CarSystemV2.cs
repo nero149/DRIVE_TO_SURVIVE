@@ -287,7 +287,9 @@ private void calculateEnginePower(){
  
 	if (GearType2 == GearType.Automatic){
 
-
+        if(m_AccelerationInput > 0 && reverse ){
+            reverse = false;
+        }
 
         if(m_BrakingInput > 0 && wheelsRPM <= 0 && !reverse ){
             reverse = true;
