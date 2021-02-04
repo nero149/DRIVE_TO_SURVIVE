@@ -82,12 +82,12 @@ public class CarSystemV2 : MonoBehaviour
 	
 	
 	public SpeedmeterManager speedmeterManager;
-	public float m_horizontalInput;
+	[HideInInspector] public float m_horizontalInput;
 	[HideInInspector] public float m_verticalInput;
-	public float m_AccelerationInput;
-	public float m_BrakingInput;
+	[HideInInspector] public float m_AccelerationInput;
+	[HideInInspector] public float m_BrakingInput;
 	[HideInInspector] public float m_steeringAngle;
-	 public float  m_HandBrakingInput;
+	[HideInInspector] public float  m_HandBrakingInput;
 	[HideInInspector] public bool  m_NitrousInput;
 	[HideInInspector] public bool  m_GearDownInput;
 	[HideInInspector] public bool  m_GearUpInput;
@@ -114,50 +114,83 @@ public class CarSystemV2 : MonoBehaviour
 	private GameObject Base;
 	private GameObject BASEMODEL;
 	public int BackLanternNumber;
+	public bool drifting = false;
+	public float Momentum = 0;
+	[Range(-90,90)]
+	public float MomentumAngle = 0;
+	public float MomentumPressure = 0;
+	[Range(0f,50f)]
+	public float BaseTresHold = 0;
+	public float MomentumTresHold = 0;
+	public float ActiveTresHold2 = 0;
+	public float PosActiveTresHold = 0;
+	public float NegActiveTresHold = 0;
+	[Range(0f,2f)]
+	public float GripBonus = 0f;
+	[Range(0f,2f)]
+	public float SideExtremumSlip = 0f;
+	[Range(0f,2f)]
+	public float SideAsySlip = 0f;
+	[Range(0f,2f)]
+	public float FrontExtremumSlip = 0f;
+	[Range(0f,2f)]
+	public float FrontAsySlip = 0f;
+	[Range(0f,1f)]
+	public float SuspensionHeight = 0f;
+	public float RearBaseStiffness = 2;
+	public float ActualSFrictionManipulation = 0;
+	public float ActualFFrictionManipulation = 0;
 	public bool BacklightsFlag = false;
 	public Renderer Backren;
 	public Material[] Backmat;
-
 	public AnimationCurve enginePower;
-	public float torque = 200;
 	public float brakPower = 0;
 	public float radius = 6;
-    public float SPEED;
+    [HideInInspector]public float SPEED;
 	public float VisualSPEED;
 	public float VisualMPH;
 	public float VisualKPH;
-	
 	public float totalPower;
     public float engineRPM;
-	public int gearNum;
-	public int PrevManualgear;
-	public int NextManualgear;
+	[HideInInspector]public int gearNum;
+	[HideInInspector]public int PrevManualgear;
+	[HideInInspector]public int NextManualgear;
 	public float ManualgearSpeedLimit;
 	public bool GearChanging = false;
 	public bool reverse = false;
 	public bool mreverse = false;
 	public bool braking = false;
-	public float[] Slip = new float[4];
-	public float[] SideSlip = new float[4];
+	public bool hbraking = false;
+	[HideInInspector]private WheelHit wheelHit;
+	[HideInInspector]private WheelHit wheelHit1;
+	[HideInInspector]private WheelHit wheelHit2;
+	[HideInInspector]private WheelHit wheelHit3;
+	[HideInInspector]public float[] Slip = new float[4];
+	[HideInInspector]public float[] SideSlip = new float[4];
+	[HideInInspector]public float[] wheelSlip = new float[4];
 	public float wheelsRPM;
-	public float lastValue;
-	public bool flag=false;
-	public float handBrakeFrictionMultiplier = 3f;
-	public float driftFactor;
+	[HideInInspector]public float lastValue;
+	[HideInInspector]public bool flag=false;
+	[Range(1f,2f)]
+	public float handBrakeFriction = 1f;
+	private float handBrakeFrictionMultiplier = 3f;
+	private float driftFactor;
 	public WheelFrictionCurve  forwardFriction,sidewaysFriction;
+	[Range(0f,2f)]
+	public float BaseFriction;
     public float maxRPM , minRPM;
     public float[] gears;
     public float[] gearChangeSpeed;
 	public float Reversegear;
 	public float ReversegearSpeed;
-	public  bool test; //engine sound boolean
-	public  float smoothTime = 0.09f;
+	[HideInInspector]public bool test; //engine sound boolean
+	private float smoothTime = 0.09f;
 	
-	private WheelHit wheelHit;
-	private WheelHit wheelHit1;
-	private WheelHit wheelHit2;
-	private WheelHit wheelHit3;
-	private float DownForceValue = 10f;
+	[Range(8f,20f)]
+	public float DownForceValue = 10f;
+	
+	[Range(60000,100000)]
+	public float spring = 75000;
     // Start is called before the first frame update
     private void Awake() 
 	{
@@ -204,6 +237,8 @@ public class CarSystemV2 : MonoBehaviour
 		calculateEnginePower();
 		adjustTraction();
 		shifter();
+		DriftCar();
+		Momentummanager();
     }
 	
 	//
@@ -223,7 +258,7 @@ private void calculateEnginePower(){
 			if(checkGears()){		
 			totalPower = 1.6f * enginePower.Evaluate(engineRPM) /6;
 			}else{
-			totalPower = 3.6f * enginePower.Evaluate(engineRPM) * (m_AccelerationInput);	
+			totalPower = 6.6f * enginePower.Evaluate(engineRPM) * (m_AccelerationInput);	
 			}
 	
 	    float velocity  = 0.0f;
@@ -262,8 +297,8 @@ private void calculateEnginePower(){
             test = (lastValue > engineRPM) ? true : false;
         }
         else { 
-            engineRPM = Mathf.SmoothDamp(engineRPM,(Mathf.Abs(wheelsRPM) * 3.6f * (Reversegear)), ref velocity , smoothTime);
-            test = false;
+			engineRPM = Mathf.SmoothDamp(engineRPM,(Mathf.Abs(wheelsRPM) * 3.6f * (Reversegear)), ref velocity , smoothTime);
+			test = false;
         }
         if (engineRPM >= maxRPM + 1000) engineRPM = maxRPM + 1000; // clamp at max
 				
@@ -283,18 +318,18 @@ private void calculateEnginePower(){
             sum += wheels[i].rpm;
             R++;
         }
-        wheelsRPM = (R != 0) ? sum / R : 0;
- 
+		wheelsRPM = (R != 0) ? sum / R : 0;		
+		
 	if (GearType2 == GearType.Automatic){
 
         if(m_AccelerationInput > 0 && reverse ){
             reverse = false;
         }
 
-        if(m_BrakingInput > 0 && wheelsRPM <= 0 && !reverse ){
+        if(m_BrakingInput > 0 && wheelsRPM < 0 && !reverse && gearNum == 0){
             reverse = true;
         }
-        else if(m_BrakingInput == 0 && wheelsRPM > 0 && reverse){
+        else if(m_BrakingInput == 0 && wheelsRPM > 0 && reverse && gearNum == 0){
             reverse = false;
         }
 		
@@ -342,7 +377,7 @@ private void calculateEnginePower(){
             gearNum++;
 			speedmeterManager.changeGear();
         }
-        if(engineRPM < minRPM && gearNum > 0){
+        if(engineRPM < minRPM && gearNum > 0 && !reverse){
             gearNum --;
 			speedmeterManager.changeGear();
         }
@@ -636,13 +671,16 @@ private void Steer()
 		if (m_horizontalInput > 0 ) {
             wheels[0].steerAngle = Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius + (1.5f / 2))) * m_horizontalInput;
             wheels[1].steerAngle = Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius - (1.5f / 2))) * m_horizontalInput;
+			MomentumAngle = wheels[1].steerAngle ;
         } else if (m_horizontalInput < 0 ) {                                                          
             wheels[0].steerAngle = Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius - (1.5f / 2))) * m_horizontalInput;
             wheels[1].steerAngle = Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius + (1.5f / 2))) * m_horizontalInput;
+			MomentumAngle = wheels[0].steerAngle ;
 
         } else {
             wheels[0].steerAngle =0;
             wheels[1].steerAngle =0;
+			MomentumAngle = 0 ;
         }
 
     }
@@ -752,7 +790,7 @@ private void Steer()
 
 	private void adjustTraction(){
             //tine it takes to go from normal drive to drift 
-        float driftSmothFactor = .7f * Time.deltaTime;
+        float driftSmothFactor = .2f * Time.deltaTime;
 
 		if(m_HandBrakingInput > 0){
             sidewaysFriction = wheels[0].sidewaysFriction;
@@ -767,23 +805,25 @@ private void Steer()
                 wheels [i].forwardFriction = forwardFriction;
             }
 
-            sidewaysFriction.extremumValue = sidewaysFriction.asymptoteValue = forwardFriction.extremumValue = forwardFriction.asymptoteValue =  1.6f;
+            sidewaysFriction.extremumValue = sidewaysFriction.asymptoteValue = forwardFriction.extremumValue = forwardFriction.asymptoteValue =  BaseFriction + handBrakeFriction;
                 //extra grip for the front wheels
             for (int i = 0; i < 2; i++) {
                 wheels [i].sidewaysFriction = sidewaysFriction;
                 wheels [i].forwardFriction = forwardFriction;
             }
-            brakPower =(SPEED <= 0)? 10000 : 0;
-			braking = true;
+			hbraking = true;
+			MomentumPressure = 2;
+			
 		}
             //executed when handbrake is being held
         else{
-
+			hbraking = false;
+			MomentumPressure = 0;
 			forwardFriction = wheels[0].forwardFriction;
 			sidewaysFriction = wheels[0].sidewaysFriction;
 
 			forwardFriction.extremumValue = forwardFriction.asymptoteValue = sidewaysFriction.extremumValue = sidewaysFriction.asymptoteValue = 
-                ((SPEED * handBrakeFrictionMultiplier) / 300) + 1;
+                ((BaseFriction + SPEED * handBrakeFrictionMultiplier) / 800) + 1;
 
 			for (int i = 0; i < 4; i++) {
 				wheels [i].forwardFriction = forwardFriction;
@@ -816,20 +856,46 @@ private void Accelerate()
 	{					
 		if (CarType == driveType.allWheelDrive){
 		for (int i = 0; i < wheels.Length; i++){
+			
+		if(hbraking){
+		wheels[i].motorTorque = totalPower /5;
+		wheels[i].brakeTorque = 400;
+		//wheels[3].brakeTorque = 1000;
+		}else{
 		wheels[i].motorTorque = totalPower /4;
 		wheels[i].brakeTorque = brakPower;
 		}
+		
+		}
         }else if(CarType == driveType.rearWheelDrive){
 		for (int i = 0; i < wheels.Length; i++){
+			
+		if(hbraking){
+		wheels[2].motorTorque = totalPower /5; // /2
+        wheels[3].motorTorque = totalPower /5;
+		wheels[i].brakeTorque = 400;
+		//wheels[3].brakeTorque = 1000;
+		}else{	
 		wheels[2].motorTorque = totalPower /2; // /2
         wheels[3].motorTorque = totalPower /2;
 		wheels[i].brakeTorque = brakPower;
 		}
+		
+		}
         }else{
 		for (int i = 0; i < wheels.Length; i++){
+				
+		if(hbraking){
+		wheels[0].motorTorque = totalPower /5; // /2
+        wheels[1].motorTorque = totalPower /5;
+		wheels[i].brakeTorque = 400;
+		//wheels[3].brakeTorque = 1000;
+		}else{	
 		wheels[0].motorTorque = totalPower /2; // /2
         wheels[1].motorTorque = totalPower /2;
 		wheels[i].brakeTorque = brakPower;
+		
+		}
 		}
 		}
 			
@@ -857,7 +923,7 @@ private void Accelerate()
 		}
 	}
 
-		    private void BackactivateLights() {
+	private void BackactivateLights() {
         if (braking) BackturnLightsOn();
         else BackturnLightsOff();
     }
@@ -880,6 +946,121 @@ private void Accelerate()
         //lights.SetActive(false);
     }
 	
+	private void DriftCar() {
+	
+			wheels[0].GetGroundHit(out wheelHit);
+			wheels[1].GetGroundHit(out wheelHit1);
+			wheels[2].GetGroundHit(out wheelHit2);
+			wheels[3].GetGroundHit(out wheelHit3);
+			
+			
+
+		for (int i = 0; i < wheels.Length; i++){
+			radius = 4 + (-Mathf.Abs(wheelHit.sidewaysSlip) * 2) + GetComponent<Rigidbody>().velocity.magnitude / 10;
+			//WHEEL 1
+			if(wheels[0].GetGroundHit(out wheelHit)){
+			wheelSlip[0] = Mathf.Abs(wheelHit.forwardSlip) + Mathf.Abs(wheelHit.sidewaysSlip);
+			
+			//WHEEL 2
+			if(wheels[1].GetGroundHit(out wheelHit1)){
+			wheelSlip[1] = Mathf.Abs(wheelHit1.forwardSlip) + Mathf.Abs(wheelHit1.sidewaysSlip);
+			
+			//WHEEL 3
+			if(wheels[2].GetGroundHit(out wheelHit2)){
+			wheelSlip[2] = Mathf.Abs(wheelHit2.forwardSlip) + Mathf.Abs(wheelHit2.sidewaysSlip);
+
+			
+			//WHEEL 4
+			if(wheels[3].GetGroundHit(out wheelHit3)){
+			wheelSlip[3] = Mathf.Abs(wheelHit3.forwardSlip) + Mathf.Abs(wheelHit.sidewaysSlip);
+			
+			forwardFriction = wheels[0].forwardFriction;
+			forwardFriction.stiffness = (drifting)? Mathf.SmoothDamp(forwardFriction.stiffness, .3f , ref SPEED , Time.deltaTime * 2) :1 ;
+			wheels [0].forwardFriction = forwardFriction;		
+			
+			sidewaysFriction = wheels[0].sidewaysFriction;
+			sidewaysFriction.stiffness = (drifting)? Mathf.SmoothDamp(sidewaysFriction.stiffness, .3f , ref SPEED , Time.deltaTime * 2) :1 ;
+			wheels [0].sidewaysFriction = sidewaysFriction;
+			
+			forwardFriction = wheels[1].forwardFriction;
+			forwardFriction.stiffness = (drifting)? Mathf.SmoothDamp(forwardFriction.stiffness, .3f , ref SPEED , Time.deltaTime * 2) :1 ;
+			wheels [1].forwardFriction = forwardFriction;		
+			
+			sidewaysFriction = wheels[1].sidewaysFriction;
+			sidewaysFriction.stiffness = (drifting)? Mathf.SmoothDamp(sidewaysFriction.stiffness, .3f , ref SPEED , Time.deltaTime * 2) :1 ;
+			wheels [1].sidewaysFriction = sidewaysFriction;
+			
+			forwardFriction = wheels[2].forwardFriction;
+			forwardFriction.stiffness = (drifting)? Mathf.SmoothDamp(forwardFriction.stiffness, .3f , ref SPEED , Time.deltaTime * 2) :1 ;
+			wheels [2].forwardFriction = forwardFriction;		
+			
+			sidewaysFriction = wheels[2].sidewaysFriction;
+			sidewaysFriction.stiffness = (drifting)? Mathf.SmoothDamp(sidewaysFriction.stiffness, .3f , ref SPEED , Time.deltaTime * 2) :2;
+			wheels [2].sidewaysFriction = sidewaysFriction;
+			
+			forwardFriction = wheels[3].forwardFriction;
+			forwardFriction.stiffness = (drifting)? Mathf.SmoothDamp(forwardFriction.stiffness, .3f , ref SPEED , Time.deltaTime * 2) :1 ;
+			wheels [3].forwardFriction = forwardFriction;		
+			
+			sidewaysFriction = wheels[3].sidewaysFriction;
+			sidewaysFriction.stiffness = (drifting)? Mathf.SmoothDamp(sidewaysFriction.stiffness, .3f , ref SPEED , Time.deltaTime * 2) :2;
+			wheels [3].sidewaysFriction = sidewaysFriction;
+			
+			}
+			else 
+			wheels [i].forwardFriction = forwardFriction;		
+			wheels [i].sidewaysFriction = sidewaysFriction;
+			
+		}
+		SPEED = CarBody.velocity.magnitude * 3.6f;
+	}
 	
 	
+}
+}
+}
+
+private void Momentummanager()
+{
+	
+	
+	float rotationbonus;
+	NegActiveTresHold = (BaseTresHold * -1);
+	PosActiveTresHold = BaseTresHold;
+	sidewaysFriction = wheels[0].sidewaysFriction;
+	rotationbonus = wheelsRPM / 20;
+	Momentum = MomentumAngle + (sidewaysFriction.extremumValue - 1) * MomentumPressure;
+	
+	
+	if(m_horizontalInput < 0){
+	ActiveTresHold2 = NegActiveTresHold;
+	MomentumPressure = -1;
+	if (Momentum > ActiveTresHold2){
+	drifting = false;
+	}
+	
+	if (Momentum < ActiveTresHold2){
+	drifting = true;
+
+	}
+	
+	
+	}
+	if(m_horizontalInput > 0){
+		ActiveTresHold2 = PosActiveTresHold;
+		MomentumPressure = 1;
+
+	if (Momentum < ActiveTresHold2){
+	drifting = false;
+	}
+	
+	if (Momentum > ActiveTresHold2){
+	drifting = true;
+	}
+	
+	}
+	
+	
+}
+
 }

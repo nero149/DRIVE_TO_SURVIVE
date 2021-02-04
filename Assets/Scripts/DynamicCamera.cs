@@ -8,7 +8,7 @@ public class DynamicCamera : MonoBehaviour
 public GameObject Player;
 public CarSystemV2 CarControl;
 public GameObject child;
-public float Speed = 0;
+public float Speed2 = 0;
 [Range (0, 50)] public float smothTime = 8;
 
 
@@ -25,8 +25,8 @@ private void FixedUpdate()
 }
 private void follow()
 {
-	Speed = Mathf.Lerp(Speed , CarControl.SPEED / smothTime,Time.deltaTime);
-	gameObject.transform.position = Vector3.Lerp(gameObject.transform.position,child.transform.position,Time.deltaTime * Speed);
+	Speed2 = Mathf.Lerp(Speed2 , CarControl.SPEED / smothTime,Time.deltaTime);
+	gameObject.transform.position = Vector3.Lerp(gameObject.transform.position,child.transform.position,Time.deltaTime * Speed2);
 	gameObject.transform.LookAt(Player.gameObject.transform.position);
 
 }
