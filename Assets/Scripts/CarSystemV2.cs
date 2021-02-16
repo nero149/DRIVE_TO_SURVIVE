@@ -176,7 +176,7 @@ public class CarSystemV2 : MonoBehaviour
 	private float handBrakeFrictionMultiplier = 3f;
 	private float driftFactor;
 	public WheelFrictionCurve  forwardFriction,sidewaysFriction;
-	[Range(0f,2f)]
+	[Range(0.5f,2f)]
 	public float BaseFriction;
     public float maxRPM , minRPM;
     public float[] gears;
@@ -235,10 +235,10 @@ public class CarSystemV2 : MonoBehaviour
 		BackactivateLights();
 		lastValue = engineRPM;
 		calculateEnginePower();
-		adjustTraction();
 		shifter();
-		DriftCar();
-		Momentummanager();
+		adjustTraction();
+		//DriftCar();
+		//Momentummanager();
     }
 	
 	//
@@ -691,7 +691,7 @@ private void Steer()
 	{
 		if (!reverse){
         if (m_BrakingInput > 0 ){
-            brakPower =(SPEED >= 0)? 1500 : 0;
+            brakPower =(SPEED >= 0)? 2500 : 0;
 			braking = true;
         }
         else 
@@ -702,7 +702,7 @@ private void Steer()
 
 		}else{
 		    if (m_AccelerationInput > 0){
-            brakPower =(SPEED >= 0)? 1500: 0;
+            brakPower =(SPEED >= 0)? 2500: 0;
 			braking = true;
         }
         else 
@@ -965,45 +965,57 @@ private void Accelerate()
             //tine it takes to go from normal drive to drift 
         float driftSmothFactor = .2f * Time.deltaTime;
 
-		if(m_HandBrakingInput > 0){
-            sidewaysFriction = wheels[0].sidewaysFriction;
-            forwardFriction = wheels[0].forwardFriction;
+		//if(m_HandBrakingInput > 0){
+            //sidewaysFriction = wheels[0].sidewaysFriction;
+            //forwardFriction = wheels[0].forwardFriction;
 
-            float velocity = 0;
-            sidewaysFriction.extremumValue =sidewaysFriction.asymptoteValue = forwardFriction.extremumValue = forwardFriction.asymptoteValue =
-                Mathf.SmoothDamp(forwardFriction.asymptoteValue,driftFactor * handBrakeFrictionMultiplier,ref velocity ,driftSmothFactor );
+            //float velocity = 0;
+           // sidewaysFriction.extremumValue =sidewaysFriction.asymptoteValue = forwardFriction.extremumValue = forwardFriction.asymptoteValue =
+               // Mathf.SmoothDamp(forwardFriction.asymptoteValue,driftFactor * handBrakeFrictionMultiplier,ref velocity ,driftSmothFactor );
 
-            for (int i = 0; i < 4; i++) {
-                wheels [i].sidewaysFriction = sidewaysFriction;
-                wheels [i].forwardFriction = forwardFriction;
-            }
+           // for (int i = 0; i < 4; i++) {
+             //   wheels [i].sidewaysFriction = sidewaysFriction;
+              //  wheels [i].forwardFriction = forwardFriction;
+            //}
 
-            sidewaysFriction.extremumValue = sidewaysFriction.asymptoteValue = forwardFriction.extremumValue = forwardFriction.asymptoteValue =  BaseFriction + handBrakeFriction;
+            //sidewaysFriction.extremumValue = sidewaysFriction.asymptoteValue = forwardFriction.extremumValue = forwardFriction.asymptoteValue = 0f;
                 //extra grip for the front wheels
-            for (int i = 0; i < 2; i++) {
-                wheels [i].sidewaysFriction = sidewaysFriction;
-                wheels [i].forwardFriction = forwardFriction;
-            }
-			hbraking = true;
-			MomentumPressure = 2;
-			
-		}
+            //for (int i = 0; i < 2; i++) {
+             //   wheels [i].sidewaysFriction = sidewaysFriction;
+            //    wheels [i].forwardFriction = forwardFriction;
+            //}
+			//hbraking = true;
+			//MomentumPressure = 2;
+		//}
             //executed when handbrake is being held
-        else{
+       // else{
+			//hbraking = false;
+			//MomentumPressure = 0;
+			//forwardFriction = wheels[0].forwardFriction;
+			//sidewaysFriction = wheels[0].sidewaysFriction;
+
+			//forwardFriction.extremumValue = forwardFriction.asymptoteValue = sidewaysFriction.extremumValue = sidewaysFriction.asymptoteValue = 
+                //((BaseFriction + SPEED * handBrakeFrictionMultiplier) / 800) + 1;
+
+			//for (int i = 0; i < 4; i++) {
+			//	wheels [i].forwardFriction = forwardFriction;
+			//	wheels [i].sidewaysFriction = sidewaysFriction;
+//
+			//}
+       // }
+
 			hbraking = false;
 			MomentumPressure = 0;
 			forwardFriction = wheels[0].forwardFriction;
 			sidewaysFriction = wheels[0].sidewaysFriction;
 
 			forwardFriction.extremumValue = forwardFriction.asymptoteValue = sidewaysFriction.extremumValue = sidewaysFriction.asymptoteValue = 
-                ((BaseFriction + SPEED * handBrakeFrictionMultiplier) / 800) + 1;
+                ((BaseFriction + SPEED * handBrakeFrictionMultiplier) / 1800) + 1;
 
 			for (int i = 0; i < 4; i++) {
 				wheels [i].forwardFriction = forwardFriction;
 				wheels [i].sidewaysFriction = sidewaysFriction;
-
 			}
-        }
 
             //checks the amount of slip to control the drift
 		for(int i = 2;i<4 ;i++){
